@@ -1,6 +1,5 @@
-/* Estilos personalizados */
 body {
-    background-color: lightcyan; /* Fondo claro para el cuerpo */
+    background-color: lightcyan;
 }
 
 .container {
@@ -15,7 +14,7 @@ body {
 }
 
 .btn {
-    font-size: 1.1rem; /* Aumenta el tamaño de la fuente de los botones */
+    font-size: 1.1rem;
 }
 
 a.btn-secondary {

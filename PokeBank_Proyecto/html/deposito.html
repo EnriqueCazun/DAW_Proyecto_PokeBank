@@ -1,68 +1,126 @@
-<html lang="en">
-    <head>
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-            crossorigin="anonymous" />
-        <title>Deposito</title>
-    </head>
-    <body>
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <h4 class="text-center">Deposito de efectivo</h4>
-                </div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/validate.js/0.13.1/validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>Depósito - Pokémon Bank</title>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h4>DEPÓSITO DE EFECTIVO</h4>
+                <p class="mb-0" id="cuentaText">Cuenta: [Cargando...]</p>
             </div>
-            <div class="row">
-                <div class="col-lg-2"></div>
-                <div class="col-lg-8 col-sm-12">
+            <div class="card-body">
+                <form id="depositoForm" class="contenido-formulario mx-auto">
                     <div class="mb-3">
-                        <label for="dui" class="form-label">Ingrese documento de identidad</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="dui"
-                            placeholder="023456789"/>
-                    </div>
-                     <div class="mb-3">
-                        <label for="numeroDeCuenta" class="form-label">Ingrese numero de cuenta </label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="numeroDeCuenta"
-                            placeholder="000000001"/>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="monto" class="form-label">Ingrese moto a depositar </label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="monto"
-                            placeholder="$100"/>
+                        <label for="dui" class="form-label">Documento de Identidad</label>
+                        <input type="text" class="form-control" id="dui" required />
                     </div>
                     <div class="mb-3">
-                        <label for="correo" class="form-label">Correo electronico </label>
-                        <input
-                            type="email"
-                            class="form-control"
-                            id="correo"
-                            placeholder="email@gmail.com" />
+                        <label for="numeroDeCuenta" class="form-label">Número de Cuenta</label>
+                        <input type="text" class="form-control" id="numeroDeCuenta" required />
                     </div>
                     <div class="mb-3">
-                        <label for="comentario" class="form-label">comentario</label>
-                        <textarea class="form-control" id="comentario" rows="3"></textarea>
+                        <label for="monto" class="form-label">Monto a Depositar</label>
+                        <input type="number" class="form-control" id="monto" min="0.01" step="0.01" required />
                     </div>
                     <div class="mb-3">
-                       <button class="btn btn-success w-100">Realizar deposito </button>
+                        <label for="correo" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="correo" required />
                     </div>
-                     <div class="mb-3 align-self-center">
-                       <a href="menu.html" class="btn btn-secondary">Regresar al menú</a>
+                    <div class="mb-3">
+                        <label for="comentario" class="form-label">Comentario <span class="text-muted">(opcional)</span></label>
+                        <textarea class="form-control" id="comentario" rows="2"></textarea>
                     </div>
-                </div>
-                <div class="col-lg-2"></div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="button" class="btn btn-success btn-lg" onclick="realizarDeposito()">Realizar Depósito</button>
+                        <a href="menu.html" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
             </div>
         </div>
-    </body>
+    </div>
+
+    <script>
+        if (!localStorage.getItem("usuario")) {
+            localStorage.setItem("usuario", JSON.stringify({ cuenta: "123456", nombre: "Ash Ketchum", saldo: 500 }));
+        }
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
+        document.getElementById("cuentaText").textContent = `Cuenta: ${usuario.cuenta}`;
+
+        function realizarDeposito() {
+            const valores = {
+                dui: document.getElementById("dui").value.trim(),
+                numeroDeCuenta: document.getElementById("numeroDeCuenta").value.trim(),
+                monto: parseFloat(document.getElementById("monto").value.trim()),
+                correo: document.getElementById("correo").value.trim()
+            };
+
+            const restricciones = {
+                dui: { presence: { allowEmpty: false } },
+                numeroDeCuenta: { presence: { allowEmpty: false } },
+                monto: {
+                    presence: true,
+                    numericality: { greaterThan: 0, message: "debe ser mayor que 0." }
+                },
+                correo: {
+                    presence: { allowEmpty: false },
+                    email: true
+                }
+            };
+
+            const errores = validate(valores, restricciones);
+
+            if (errores) {
+                const mensajes = Object.values(errores).map(arr => `- ${arr.join(", ")}`).join("<br>");
+                Swal.fire("Campos inválidos", mensajes, "error");
+                return;
+            }
+
+            usuario.saldo += valores.monto;
+            localStorage.setItem("usuario", JSON.stringify(usuario));
+
+            const nuevaTransaccion = {
+                tipo: "Depósito",
+                monto: valores.monto.toFixed(2),
+                fecha: new Date().toLocaleString()
+            };
+
+            let transacciones = JSON.parse(localStorage.getItem("transacciones")) || [];
+            transacciones.push(nuevaTransaccion);
+            localStorage.setItem("transacciones", JSON.stringify(transacciones));
+
+            Swal.fire({
+                title: "¿Desea generar un recibo?",
+                showCancelButton: true,
+                confirmButtonText: "Sí, generar PDF",
+                cancelButtonText: "No"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    doc.setFontSize(14);
+                    doc.text("Comprobante de Depósito - Pokémon Bank", 10, 15);
+                    doc.setFontSize(12);
+                    doc.text(`Nombre: ${usuario.nombre}`, 10, 30);
+                    doc.text(`Cuenta: ${usuario.cuenta}`, 10, 40);
+                    doc.text(`Monto: $${valores.monto.toFixed(2)}`, 10, 50);
+                    doc.text(`Fecha: ${nuevaTransaccion.fecha}`, 10, 60);
+                    doc.text(`Comentario: ${document.getElementById("comentario").value || 'N/A'}`, 10, 70);
+                    doc.save("recibo-deposito.pdf");
+                }
+
+                Swal.fire("Depósito exitoso", `Saldo actual: $${usuario.saldo.toFixed(2)}`, "success");
+                document.getElementById("depositoForm").reset();
+            });
+        }
+    </script>
+</body>
 </html>

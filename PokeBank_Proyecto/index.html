@@ -21,12 +21,6 @@
 
     <body>
         <div class="container d-flex justify-content-center align-items-center vh-100">
-            <!--
-            Clases de Bootstrap utilizadas
-            card: crear una tarjeta contenedora
-            p-4: añade padding a todos los lados del formulario
-            shadow-lg: añade efecto de sombra 
-         -->
             <div class="card p-4 shadow-lg contendio-formulario">
                 <form id="loginForm">
                     <div class="text-center">
@@ -46,18 +40,12 @@
                 </form>
             </div>
         </div>
-
-        <!--VALIDACION USANDO VALIDATEJS Y SWEET ALERT-->
         <script>
             (function () {
                 validate.validators.presence.message = "es requerido";
-
-                // These are the constraints used to validate the form
                 var constraints = {
                     pin: {
-                        // Password is also required
                         presence: true,
-                        // And must be at least 5 characters long
                         length: {
                             minimum: 4,
                             message: "debe contener 4 numeros"
@@ -65,14 +53,12 @@
                     }
                 };
 
-                // Hook up the form so we can prevent it from being posted
                 var form = document.querySelector("form#loginForm");
                 form.addEventListener("submit", function (ev) {
                     ev.preventDefault();
                     handleFormSubmit(form);
                 });
 
-                // Hook up the inputs to validate on the fly
                 var inputs = document.querySelectorAll("input");
                 for (var i = 0; i < inputs.length; ++i) {
                     inputs.item(i).addEventListener("change", function (ev) {
@@ -82,26 +68,19 @@
                 }
 
                 function handleFormSubmit(form, input) {
-                    // validate the form against the constraints
                     var errors = validate(form, constraints);
-                    // then we update the form to reflect the results
                     showErrors(form, errors || {});
                     if (!errors) {
                         showSuccess();
                     }
                 }
 
-                // Updates the inputs with the validation errors
                 function showErrors(form, errors) {
-                    // We loop through all the inputs and show the errors for that input
                     _.each(form.querySelectorAll("input[name]"), function (input) {
-                        // Since the errors can be null if no errors were found we need to handle
-                        // that
                         showErrorsForInput(errors && errors[input.name]);
                     });
                 }
 
-                // Shows the errors for a specific input
                 function showErrorsForInput(errors) {
                     if (errors) {
                         var messageError = "";
@@ -115,10 +94,9 @@
 
                 function showSuccess() {
                     var pin = document.getElementById("pin").value;
-                    //Validacion del pin DATO MODO PRUEBA
                     if (pin == "1234") {
                         swal("Exitoso", "El login fue existoso", "success").then((value) => {
-                            window.location.href = "html/menu.html"; //Llevar a la pagina del menu
+                            window.location.href = "html/menu.html";
                         });
                     } else {
                         swal("Error", "PIN incorrecto. Por favor, verificar e intentar nuevamente", "error");

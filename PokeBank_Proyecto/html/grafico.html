@@ -10,55 +10,68 @@
 <body>
   <div class="container mt-5">
     <h2 class="text-center mb-4">Transacciones por Tipo</h2>
-    <canvas id="graficoTransacciones"></canvas>
+    <div id="contenedorGrafico" class="text-center">
+      <canvas id="graficoTransacciones" class="d-none"></canvas>
+      <p id="mensajeSinDatos" class="text-muted">Cargando datos...</p>
+    </div>
     <div class="text-center mt-4">
       <a href="menu.html" class="btn btn-secondary">Volver al menú</a>
     </div>
   </div>
 
   <script>
-    const dataGuardada = localStorage.getItem("transacciones");
-    let transacciones = [];
+    document.addEventListener("DOMContentLoaded", function () {
+      const dataGuardada = localStorage.getItem("transacciones");
+      let transacciones = [];
 
-    if (dataGuardada) {
       try {
         transacciones = JSON.parse(dataGuardada);
-      } catch (e) {
-        console.error("Error al parsear transacciones:", e);
+        if (!Array.isArray(transacciones) || transacciones.length === 0) {
+          throw new Error("No hay transacciones válidas.");
+        }
+      } catch (error) {
+        document.getElementById("mensajeSinDatos").textContent = "No hay transacciones registradas.";
+        return;
       }
-    }
 
-    const conteo = {};
-    transacciones.forEach(tx => {
-      const tipo = tx.tipo;
-      if (tipo) {
+      const conteo = {};
+      transacciones.forEach(tx => {
+        const tipo = tx.tipo || tx.servicio || "Otro";
         conteo[tipo] = (conteo[tipo] || 0) + 1;
+      });
+
+      const tipos = Object.keys(conteo);
+      const cantidades = Object.values(conteo);
+
+      if (tipos.length === 0) {
+        document.getElementById("mensajeSinDatos").textContent = "No hay transacciones registradas.";
+        return;
       }
-    });
 
-    const tipos = Object.keys(conteo);
-    const cantidades = Object.values(conteo);
+      document.getElementById("graficoTransacciones").classList.remove("d-none");
+      document.getElementById("mensajeSinDatos").remove();
 
-    const ctx = document.getElementById("graficoTransacciones").getContext("2d");
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: tipos,
-        datasets: [{
-          label: "Cantidad de Transacciones",
-          data: cantidades,
-          backgroundColor: ["#198754", "#dc3545", "#ffc107", "#0dcaf0"]
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { precision: 0 }
+      const ctx = document.getElementById("graficoTransacciones").getContext("2d");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: tipos,
+          datasets: [{
+            label: "Cantidad de Transacciones",
+            data: cantidades,
+            backgroundColor: ["#198754", "#dc3545", "#ffc107", "#0dcaf0", "#6f42c1", "#20c997"]
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            }
           }
         }
-      }
+      });
     });
   </script>
 </body>
