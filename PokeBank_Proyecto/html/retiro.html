@@ -51,20 +51,24 @@
         }
 
         function realizarRetiro() {
+            const montoInput = document.getElementById("monto").value.trim();
+            const monedaInput = document.getElementById("moneda").value.trim();
+
             const valores = {
-                monto: parseFloat(document.getElementById("monto").value.trim()),
-                moneda: document.getElementById("moneda").value.trim()
+                monto: montoInput === "" ? "" : parseFloat(montoInput),
+                moneda: monedaInput
             };
 
             const restricciones = {
                 monto: {
+                    presence: { allowEmpty: false, message: "^El monto no puede estar vacío" },
                     numericality: {
                         greaterThanOrEqualTo: 5,
-                        message: "debe ser al menos $5"
+                        message: "^El monto debe ser al menos $5"
                     }
                 },
                 moneda: {
-                    presence: { allowEmpty: false }
+                    presence: { allowEmpty: false, message: "^Debe seleccionar un tipo de moneda" }
                 }
             };
 
@@ -114,6 +118,7 @@
                     doc.save("recibo-retiro.pdf");
                 }
                 Swal.fire("Retiro realizado con éxito", `Saldo restante: $${usuario.saldo.toFixed(2)}`, "success");
+                document.getElementById("retiroForm").reset();
             });
         }
     </script>
