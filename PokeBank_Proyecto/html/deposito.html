@@ -64,15 +64,18 @@
             };
 
             const restricciones = {
-                dui: { presence: { allowEmpty: false } },
-                numeroDeCuenta: { presence: { allowEmpty: false } },
+                dui: { presence: { allowEmpty: false, message: "^DUI no puede estar vacío" } },
+                numeroDeCuenta: { presence: { allowEmpty: false, message: "^Número de cuenta no puede estar vacío" } },
                 monto: {
-                    presence: true,
-                    numericality: { greaterThan: 0, message: "debe ser mayor que 0." }
+                    presence: { allowEmpty: false, message: "^Monto no puede estar vacío" },
+                    numericality: {
+                        greaterThan: 0,
+                        message: "^Monto debe ser mayor que 0"
+                    }
                 },
                 correo: {
-                    presence: { allowEmpty: false },
-                    email: true
+                    presence: { allowEmpty: false, message: "^Correo no puede estar vacío" },
+                    email: { message: "^Correo no es un correo válido" }
                 }
             };
 
